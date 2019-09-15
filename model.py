@@ -26,6 +26,28 @@ dataset = emnist_train.create_tf_dataset_for_client( emnist_train.client_ids[0] 
 element = iter(dataset).next()
 element['label'].numpy()
 
+NUM_CLIENTS = 10
+NUM_EPOCHS = 10
+BATCH_SIZE = 20
+SHUFFLE_BUFFER = 500
+
+def preprocess(dataset):
+
+    def element_fun(element):
+        return collections.OrderedDict([
+            ('x', tf.reshape(element['pixels'], [-1])),
+            ('y', tf.reshape(element['label'], [1])),
+    ])
+
+    return dataset.repeat(NUM_EPOCHS).map(element_fun).shuffle(SHUFFLE_BUFFER).batch(BATCH_SIZE)
+
+preprocessed_dataset = preprocess(dataset)
+batch = tf.nest.map.structure(
+        lambda x: x.numpy(), iter(preprocessed_dataset).next()
+        )
+
+batch
+
 
 
 
